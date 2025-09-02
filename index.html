@@ -1,0 +1,506 @@
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        overflow: hidden;
+        background-color: #000;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #fff;
+        transition: background 1.5s ease;
+    }
+    #container {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden;
+    }
+    body.theme-molten {
+        background: linear-gradient(180deg, #000000 0%, #100500 50%, #1f0a00 100%);
+    }
+    body.theme-molten .glow {
+        background: radial-gradient(circle at 50% 50%, rgba(255, 100, 0, 0.05) 0%, rgba(200, 50, 0, 0.05) 50%, transparent 65%);
+    }
+    body.theme-molten .ui-panel { background: rgba(50, 20, 10, 0.3); border-color: rgba(255, 120, 50, 0.4); }
+    body.theme-molten .theme-btn.active { background: rgba(255, 100, 0, 0.5); border-color: rgba(255, 100, 0, 0.7); }
+    body.theme-molten .toggle-slider { background: rgba(180, 80, 40, 0.4); }
+    body.theme-molten input:checked + .toggle-slider { background-color: rgba(255, 100, 0, 0.6); }
+    body.theme-molten .toggle-slider:before { box-shadow: 0 0 8px rgba(255, 150, 50, 0.8); }
+    body.theme-cosmic {
+        background: linear-gradient(180deg, #000000 0%, #050010 50%, #0a001f 100%);
+    }
+    body.theme-cosmic .glow {
+        background: radial-gradient(circle at 50% 50%, rgba(147, 112, 219, 0.05) 0%, rgba(75, 0, 130, 0.05) 50%, transparent 65%);
+    }
+    body.theme-cosmic .ui-panel { background: rgba(40, 20, 60, 0.3); border-color: rgba(147, 112, 219, 0.4); }
+    body.theme-cosmic .theme-btn.active { background: rgba(147, 112, 219, 0.5); border-color: rgba(147, 112, 219, 0.7); }
+    body.theme-cosmic .toggle-slider { background: rgba(147, 112, 219, 0.4); }
+    body.theme-cosmic input:checked + .toggle-slider { background-color: rgba(147, 112, 219, 0.6); }
+    body.theme-cosmic .toggle-slider:before { box-shadow: 0 0 8px rgba(170, 130, 230, 0.8); }
+    body.theme-emerald {
+        background: linear-gradient(180deg, #000000 0%, #001005 50%, #001f0a 100%);
+    }
+    body.theme-emerald .glow {
+        background: radial-gradient(circle at 50% 50%, rgba(0, 255, 127, 0.05) 0%, rgba(46, 139, 87, 0.05) 50%, transparent 65%);
+    }
+    body.theme-emerald .ui-panel { background: rgba(20, 60, 40, 0.3); border-color: rgba(60, 179, 113, 0.4); }
+    body.theme-emerald .theme-btn.active { background: rgba(60, 179, 113, 0.5); border-color: rgba(60, 179, 113, 0.7); }
+    body.theme-emerald .toggle-slider { background: rgba(60, 179, 113, 0.4); }
+    body.theme-emerald input:checked + .toggle-slider { background-color: rgba(60, 179, 113, 0.6); }
+    body.theme-emerald .toggle-slider:before { box-shadow: 0 0 8px rgba(100, 200, 150, 0.8); }
+    .glow {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        pointer-events: none; mix-blend-mode: screen; opacity: 0.75; transition: background 1.5s ease;
+    }
+    .ui-panel {
+        position: fixed;
+        z-index: 100;
+        padding: 12px;
+        border: 1px solid;
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        transition: background 1.5s ease, border-color 1.5s ease;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    #ui-top-left {
+        top: 20px;
+        left: 20px;
+        flex-wrap: wrap;
+    }
+    #ui-bottom-right {
+        bottom: 20px;
+        right: 20px;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 15px;
+    }
+    .theme-btn {
+        padding: 8px 16px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.85);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.08s ease;
+        font-size: 14px;
+        font-weight: 300;
+    }
+    .theme-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.4); }
+    .theme-btn:active { transform: scale(0.98); }
+    .theme-btn.active { color: #fff; font-weight: 500; }
+    .toggle-option { display: flex; align-items: center; gap: 10px; }
+    .toggle-option label[for="animateToggle"] { cursor: pointer; font-size: 14px; font-weight: 300; color: rgba(255,255,255,0.9); }
+    .toggle-switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; transition: .3s; border-radius: 24px; }
+    .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%;}
+    input:checked + .toggle-slider:before { transform: translateX(22px); }
+    @media (max-width: 768px) {
+        .ui-panel { padding: 10px; border-radius: 12px; }
+        #ui-top-left { top: 15px; left: 15px; }
+        #ui-bottom-right { bottom: 15px; right: 15px; }
+    }
+    @media (max-width: 480px) {
+        #ui-top-left { top: 10px; left: 10px; }
+        #ui-bottom-right { bottom: 10px; right: 10px; }
+        .theme-btn { padding: 6px 12px; font-size: 12px; }
+        .toggle-option label[for="animateToggle"] { font-size: 12px; }
+    }
+</style>
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"
+        }
+    }
+</script>
+<div id="container"></div>
+<div class="glow"></div>
+<div id="ui-top-left" class="ui-panel">
+</div>
+<div id="ui-bottom-right" class="ui-panel">
+    <div id="action-buttons">
+        <button id="pulseBtn" class="theme-btn" type="button" title="Click for pulse. Hold to charge.">Pulse</button>
+    </div>
+    <div class="toggle-option">
+        <label for="animateToggle">Animate</label>
+        <label class="toggle-switch">
+            <input type="checkbox" id="animateToggle" checked />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+</div>
+<script type="module">
+    import * as THREE from 'three';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    let scene, camera, renderer, particles, composer, controls;
+    let time = 0;
+    let isAnimationEnabled = true;
+    let currentTheme = 'molten';
+    const particleCount = 10000;
+    let shockwaves = []; 
+    const MAX_HOME_RADIUS = 45; 
+    let chargeStart = null; 
+    const themes = {
+        molten: {
+            name: 'Molten',
+            colors: [ new THREE.Color(0xff4800), new THREE.Color(0xff8c00), new THREE.Color(0xd73a00), new THREE.Color(0x3d1005), new THREE.Color(0xffc600) ],
+            bloom: { strength: 0.35, radius: 0.45, threshold: 0.7 }
+        },
+        cosmic: {
+            name: 'Cosmic',
+            colors: [ new THREE.Color(0x6a0dad), new THREE.Color(0x9370db), new THREE.Color(0x4b0082), new THREE.Color(0x8a2be2), new THREE.Color(0xdda0dd) ],
+            bloom: { strength: 0.4, radius: 0.5, threshold: 0.65 }
+        },
+        emerald: {
+            name: 'Emerald',
+            colors: [ new THREE.Color(0x00ff7f), new THREE.Color(0x3cb371), new THREE.Color(0x2e8b57), new THREE.Color(0x00fa9a), new THREE.Color(0x98fb98) ],
+            bloom: { strength: 0.3, radius: 0.6, threshold: 0.75 }
+        }
+    };
+    document.addEventListener('DOMContentLoaded', init);
+    function createStarPath(particleIndex, totalParticles) {
+        const numStarPoints = 5;
+        const outerRadius = 35;
+        const innerRadius = 15;
+        const scale = 1.0;
+        const zDepth = 4;
+        const starVertices = [];
+        for (let i = 0; i < numStarPoints; i++) {
+            let angle = (i / numStarPoints) * Math.PI * 2 - Math.PI / 2;
+            starVertices.push(new THREE.Vector2(outerRadius * Math.cos(angle), outerRadius * Math.sin(angle)));
+            angle += Math.PI / numStarPoints;
+            starVertices.push(new THREE.Vector2(innerRadius * Math.cos(angle), innerRadius * Math.sin(angle)));
+        }
+        const numSegments = starVertices.length;
+        const t_path = (particleIndex / totalParticles) * numSegments;
+        const segmentIndex = Math.floor(t_path) % numSegments;
+        const segmentProgress = t_path - Math.floor(t_path);
+        const startVertex = starVertices[segmentIndex];
+        const endVertex = starVertices[(segmentIndex + 1) % numSegments];
+        const x = THREE.MathUtils.lerp(startVertex.x, endVertex.x, segmentProgress);
+        const y = THREE.MathUtils.lerp(startVertex.y, endVertex.y, segmentProgress);
+        const z = Math.sin((particleIndex / totalParticles) * Math.PI * 4) * (zDepth / 2);
+        const jitterStrength = 0.2;
+        return new THREE.Vector3(
+            x * scale + (Math.random() - 0.5) * jitterStrength,
+            y * scale + (Math.random() - 0.5) * jitterStrength,
+            z + (Math.random() - 0.5) * jitterStrength * 0.5
+        );
+    }
+    function init() {
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1500);
+        camera.position.z = 90;
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.getElementById('container').appendChild(renderer.domElement);
+        createThemeButtons();
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.04;
+        controls.rotateSpeed = 0.3;
+        controls.minDistance = 30;
+        controls.maxDistance = 300;
+        controls.enablePan = false;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.15;
+        composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+        composer.addPass(bloomPass);
+        composer.addPass(new OutputPass());
+        scene.userData.bloomPass = bloomPass;
+        createParticleSystem();
+        window.addEventListener('resize', onWindowResize);
+        document.getElementById('animateToggle').addEventListener('change', (e) => { isAnimationEnabled = e.target.checked; });
+        const pulseBtn = document.getElementById('pulseBtn');
+        pulseBtn.addEventListener('click', () => {
+            if (chargeStart !== null) return;
+            triggerShockwave({ amplitude: 12, speed: 28, width: 6, decay: 1.25 });
+        });
+        const startCharge = () => { chargeStart = performance.now(); };
+        const endCharge = () => {
+            if (chargeStart === null) return;
+            const heldMs = performance.now() - chargeStart;
+            chargeStart = null;
+            const heldSec = Math.min(heldMs / 1000, 2.0); 
+            const amplitude = 10 + heldSec * 15;         
+            const width = 5 + heldSec * 4;               
+            const speed = 28 + heldSec * 6;              
+            triggerShockwave({ amplitude, speed, width, decay: 1.35 });
+            pulseBtn.blur(); 
+        };
+        pulseBtn.addEventListener('mousedown', startCharge);
+        pulseBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startCharge(); }, { passive: false });
+        pulseBtn.addEventListener('mouseup', endCharge);
+        pulseBtn.addEventListener('mouseleave', endCharge);
+        pulseBtn.addEventListener('touchend', (e) => { e.preventDefault(); endCharge(); });
+        setTheme(currentTheme);
+        animate();
+    }
+    function triggerShockwave({ amplitude = 12, speed = 28, width = 6, decay = 1.25 } = {}) {
+        shockwaves.push({ t0: time, amplitude, speed, width, decay });
+        if (shockwaves.length > 6) shockwaves.shift();
+    }
+    function createThemeButtons() {
+        const themeSelector = document.createElement('div');
+        themeSelector.id = 'theme-selector';
+        themeSelector.style.display = 'flex';
+        themeSelector.style.gap = '10px';
+        themeSelector.style.flexWrap = 'wrap';
+        Object.keys(themes).forEach(themeKey => {
+            const button = document.createElement('button');
+            button.className = 'theme-btn';
+            button.dataset.theme = themeKey;
+            button.textContent = themes[themeKey].name;
+            button.addEventListener('click', () => setTheme(themeKey));
+            themeSelector.appendChild(button);
+        });
+        const controlsDiv = document.getElementById('ui-top-left');
+        controlsDiv.prepend(themeSelector);
+    }
+    function createParticleSystem() {
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        const sizes = new Float32Array(particleCount);
+        const targetPositions = new Float32Array(particleCount * 3);
+        const disintegrationOffsets = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount; i++) {
+            const i3 = i * 3;
+            const pos = createStarPath(i, particleCount);
+            positions[i3] = pos.x;
+            positions[i3 + 1] = pos.y;
+            positions[i3 + 2] = pos.z;
+            targetPositions[i3]     = pos.x;
+            targetPositions[i3 + 1] = pos.y;
+            targetPositions[i3 + 2] = pos.z;
+            const { color, size } = getAttributesForParticle(i);
+            colors[i3]     = color.r;
+            colors[i3 + 1] = color.g;
+            colors[i3 + 2] = color.b;
+            sizes[i]       = size;
+            const offsetStrength = 30 + Math.random() * 40;
+            const phi = Math.random() * Math.PI * 2;
+            const theta = Math.acos(2 * Math.random() - 1);
+            disintegrationOffsets[i3]     = Math.sin(theta) * Math.cos(phi) * offsetStrength;
+            disintegrationOffsets[i3 + 1] = Math.sin(theta) * Math.sin(phi) * offsetStrength;
+            disintegrationOffsets[i3 + 2] = Math.cos(theta) * offsetStrength * 0.5;
+        }
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        geometry.setAttribute('targetPosition', new THREE.BufferAttribute(targetPositions, 3));
+        geometry.setAttribute('disintegrationOffset', new THREE.BufferAttribute(disintegrationOffsets, 3));
+        const texture = createParticleTexture();
+        const material = new THREE.PointsMaterial({
+            size: 2.8,
+            map: texture,
+            vertexColors: true,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            sizeAttenuation: true,
+            alphaTest: 0.01
+        });
+        particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+    }
+    function getAttributesForParticle(i) {
+        const t = i / particleCount;
+        const colorPalette = themes[currentTheme].colors;
+        const colorProgress = (t * colorPalette.length * 1.5 + time * 0.05) % colorPalette.length;
+        const colorIndex1 = Math.floor(colorProgress);
+        const colorIndex2 = (colorIndex1 + 1) % colorPalette.length;
+        const blendFactor = colorProgress - colorIndex1;
+        const color1 = colorPalette[colorIndex1];
+        const color2 = colorPalette[colorIndex2];
+        const baseColor = new THREE.Color().lerpColors(color1, color2, blendFactor);
+        const color = baseColor.clone().multiplyScalar(0.65 + Math.random() * 0.55);
+        const size = 0.65 + Math.random() * 0.6;
+        return { color, size };
+    }
+    function createParticleTexture() {
+        const canvas = document.createElement('canvas');
+        const size = 64;
+        canvas.width = size; canvas.height = size;
+        const context = canvas.getContext('2d');
+        const centerX = size / 2, centerY = size / 2;
+        const outerRadius = size * 0.45;
+        const innerRadius = size * 0.20;
+        const numPoints = 5;
+        context.beginPath();
+        context.moveTo(centerX, centerY - outerRadius);
+        for (let i = 0; i < numPoints; i++) {
+            const outerAngle = (i / numPoints) * Math.PI * 2 - Math.PI / 2;
+            context.lineTo(centerX + outerRadius * Math.cos(outerAngle), centerY + outerRadius * Math.sin(outerAngle));
+            const innerAngle = outerAngle + (Math.PI / numPoints);
+            context.lineTo(centerX + innerRadius * Math.cos(innerAngle), centerY + innerRadius * Math.sin(innerAngle));
+        }
+        context.closePath();
+        const gradient = context.createRadialGradient(centerX, centerY, 0, centerX, centerY, outerRadius);
+        gradient.addColorStop(0,   'rgba(255,255,255,1)');
+        gradient.addColorStop(0.3, 'rgba(255,255,220,0.9)');
+        gradient.addColorStop(0.6, 'rgba(255,200,150,0.6)');
+        gradient.addColorStop(1,   'rgba(255,150,0,0)');
+        context.fillStyle = gradient;
+        context.fill();
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.needsUpdate = true;
+        return texture;
+    }
+    function animateParticles() {
+        if (!particles || !isAnimationEnabled) return;
+        const positions = particles.geometry.attributes.position.array;
+        const targetPositions = particles.geometry.attributes.targetPosition.array;
+        const particleColors = particles.geometry.attributes.color.array;
+        const particleSizes = particles.geometry.attributes.size.array;
+        const disintegrationOffsets = particles.geometry.attributes.disintegrationOffset.array;
+        const rotationSpeed = 0.0008;
+        const cosRot = Math.cos(rotationSpeed);
+        const sinRot = Math.sin(rotationSpeed);
+        for (let i = 0; i < particleCount; i++) {
+            const i3 = i * 3;
+            let tx = targetPositions[i3];
+            let ty = targetPositions[i3 + 1];
+            targetPositions[i3]     = tx * cosRot - ty * sinRot;
+            targetPositions[i3 + 1] = tx * sinRot + ty * cosRot;
+        }
+        const tempRotatedTargets = new Float32Array(targetPositions);
+        for (let i = 0; i < particleCount; i++) {
+            const i3 = i * 3;
+            const nextI = ((i + 1) % particleCount) * 3;
+            const flowFactor = Math.sin(time * 0.4 + (i / particleCount) * Math.PI * 10) * 0.005;
+            targetPositions[i3]     += (tempRotatedTargets[nextI]     - tempRotatedTargets[i3])     * flowFactor;
+            targetPositions[i3 + 1] += (tempRotatedTargets[nextI + 1] - tempRotatedTargets[i3 + 1]) * flowFactor;
+            targetPositions[i3 + 2] += (tempRotatedTargets[nextI + 2] - tempRotatedTargets[i3 + 2]) * flowFactor;
+        }
+        for (let i = 0; i < particleCount; i++) {
+            const i3 = i * 3;
+            const iSize = i;
+            const homeX = targetPositions[i3];
+            const homeY = targetPositions[i3 + 1];
+            const homeZ = targetPositions[i3 + 2];
+            const disintegrationCycleTime = 10.0;
+            const particleCycleOffset = (i / particleCount) * disintegrationCycleTime * 0.5;
+            const cycleProgress = ((time * 0.6 + particleCycleOffset) % disintegrationCycleTime) / disintegrationCycleTime;
+            let disintegrationAmount = 0;
+            const stablePhaseEnd = 0.5;
+            const disintegrateStartPhase = stablePhaseEnd;
+            const disintegrateFullPhase = stablePhaseEnd + 0.15;
+            const holdPhaseEnd = disintegrateFullPhase + 0.1;
+            if (cycleProgress < stablePhaseEnd) {
+                disintegrationAmount = 0;
+            } else if (cycleProgress < disintegrateFullPhase) {
+                disintegrationAmount = (cycleProgress - disintegrateStartPhase) / (disintegrateFullPhase - disintegrateStartPhase);
+            } else if (cycleProgress < holdPhaseEnd) {
+                disintegrationAmount = 1.0;
+            } else {
+                disintegrationAmount = 1.0 - ((cycleProgress - holdPhaseEnd) / (1.0 - holdPhaseEnd));
+            }
+            disintegrationAmount = Math.sin(disintegrationAmount * Math.PI * 0.5);
+            let addX = 0, addY = 0, addZ = 0;
+            const dist = Math.sqrt(homeX * homeX + homeY * homeY + homeZ * homeZ) + 1e-6;
+            for (let w = 0; w < shockwaves.length; w++) {
+                const sw = shockwaves[w];
+                const elapsed = Math.max(0, time - sw.t0);
+                const R = sw.speed * elapsed;
+                const sigma = sw.width;
+                const decayFactor = Math.exp(-sw.decay * elapsed);
+                const g = Math.exp(-((dist - R) * (dist - R)) / (2 * sigma * sigma));
+                const amp = sw.amplitude * g * decayFactor;
+                addX += (homeX / dist) * amp;
+                addY += (homeY / dist) * amp;
+                addZ += (homeZ / dist) * amp * 0.6; 
+            }
+            let currentTargetX = homeX + addX;
+            let currentTargetY = homeY + addY;
+            let currentTargetZ = homeZ + addZ;
+            let currentLerpFactor = 0.085;
+            if (disintegrationAmount > 0.001) {
+                currentTargetX += disintegrationOffsets[i3]     * disintegrationAmount;
+                currentTargetY += disintegrationOffsets[i3 + 1] * disintegrationAmount;
+                currentTargetZ += disintegrationOffsets[i3 + 2] * disintegrationAmount;
+                currentLerpFactor = 0.045 + disintegrationAmount * 0.02;
+            }
+            positions[i3]     += (currentTargetX - positions[i3])     * currentLerpFactor;
+            positions[i3 + 1] += (currentTargetY - positions[i3 + 1]) * currentLerpFactor;
+            positions[i3 + 2] += (currentTargetZ - positions[i3 + 2]) * currentLerpFactor;
+            const { color: baseParticleColor, size: baseParticleSize } = getAttributesForParticle(i);
+            let brightnessFactor = (0.65 + Math.sin((i / particleCount) * Math.PI * 7 + time * 1.3) * 0.35) * (1 - disintegrationAmount * 0.75);
+            brightnessFactor *= (0.85 + Math.sin(time * 7 + i * 0.5) * 0.15);
+            particleColors[i3]     = baseParticleColor.r * brightnessFactor;
+            particleColors[i3 + 1] = baseParticleColor.g * brightnessFactor;
+            particleColors[i3 + 2] = baseParticleColor.b * brightnessFactor;
+            let currentSize = baseParticleSize * (1 - disintegrationAmount * 0.9);
+            currentSize *= (0.8 + Math.sin(time * 5 + i * 0.3) * 0.2);
+            particleSizes[iSize] = Math.max(0.05, currentSize);
+        }
+        particles.geometry.attributes.position.needsUpdate = true;
+        particles.geometry.attributes.targetPosition.needsUpdate = true;
+        particles.geometry.attributes.color.needsUpdate = true;
+        particles.geometry.attributes.size.needsUpdate = true;
+        if (shockwaves.length) {
+            const keep = [];
+            for (let w = 0; w < shockwaves.length; w++) {
+                const sw = shockwaves[w];
+                const elapsed = time - sw.t0;
+                const R = sw.speed * elapsed;
+                const expiredByRadius = (R - MAX_HOME_RADIUS) > (6 * sw.width);
+                const expiredByTime = elapsed > 12;
+                if (!(expiredByRadius || expiredByTime)) keep.push(sw);
+            }
+            shockwaves = keep;
+        }
+    }
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        composer.setSize(window.innerWidth, window.innerHeight);
+    }
+    function setTheme(themeName) {
+        if (!themes[themeName]) return;
+        currentTheme = themeName;
+        document.body.className = `theme-${currentTheme}`;
+        document.querySelectorAll('.theme-btn[data-theme]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.theme === themeName);
+        });
+        const theme = themes[currentTheme];
+        const bloomPass = scene.userData.bloomPass;
+        if (bloomPass) {
+            bloomPass.strength = theme.bloom.strength;
+            bloomPass.radius = theme.bloom.radius;
+            bloomPass.threshold = theme.bloom.threshold;
+        }
+        updateParticleColorsAndSizes();
+    }
+    function updateParticleColorsAndSizes() {
+        if (!particles) return;
+        const pColors = particles.geometry.attributes.color.array;
+        const pSizes = particles.geometry.attributes.size.array;
+        for (let i = 0; i < particleCount; i++) {
+            const { color, size } = getAttributesForParticle(i);
+            pColors[i * 3]     = color.r;
+            pColors[i * 3 + 1] = color.g;
+            pColors[i * 3 + 2] = color.b;
+            pSizes[i]          = size;
+        }
+        particles.geometry.attributes.color.needsUpdate = true;
+        particles.geometry.attributes.size.needsUpdate = true;
+    }
+    function animate() {
+        requestAnimationFrame(animate);
+        time += 0.02;
+        controls.update();
+        if (isAnimationEnabled) animateParticles();
+        composer.render();
+    }
+</script>
